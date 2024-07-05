@@ -97,7 +97,7 @@ const Page = () => {
                 <Typography variant='h6'>Timestamp {numbertoTimeConverter(keyframeDict['filteredFrameIndexTimestamp']+1)}</Typography>
                 {
                     isEditing ?
-                    <textarea variant='caption' onChange={(e)=>setNewDescription(e.target.value)} value={newDescription} style={{height:'10em', fontSize:'0.9rem'}}>{keyframeDict['description']}</textarea>
+                    <textarea className='text-black' variant='caption' onChange={(e)=>setNewDescription(e.target.value)} value={newDescription} style={{height:'10em', fontSize:'0.9rem'}}>{keyframeDict['description']}</textarea>
                     :
                     <Typography variant='caption'>{keyframeDict['description']}</Typography>
                 }
