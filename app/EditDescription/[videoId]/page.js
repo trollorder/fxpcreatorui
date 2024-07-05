@@ -110,7 +110,7 @@ const Page = () => {
                 {isRegenerating && 
                 <div className='flex justify-center'>
                     <Typography variant='subtitle'>Regenerating Description</Typography>
-                    <Dotloader loading={isRegenerating} color='red'/>
+                    <Dotloader loading={isRegenerating} color='blue'/>
                 </div>
                 }
                 <Button style={{color:'red', backgroundColor:'white'}} variant='contained' disabled={isRegenerating} onClick={()=>{handleRegenerateKeyframeDescription()}}>Regenerate Description</Button>
