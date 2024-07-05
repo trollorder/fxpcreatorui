@@ -3,12 +3,17 @@ import React, { use } from 'react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FormControl, Input, Typography, Button } from '@mui/material';
+import ClipLoader from "react-spinners/ClipLoader";
+import { useRouter } from 'next/navigation';
+
 export default function  EditVideoDetailsPage() {
+    const router = useRouter();
     const [s3ObjectKeyNoVideo,setS3ObjectKeyNoVideo] = useState(null);
     const [keyframesBase64, setKeyframesBase64] = useState(null);
     const [newTitle, setNewTitle] = useState('');
     const [videoDetails, setVideoDetails] = useState({});
     const [audioBase64, setAudioBase64] = useState(null);
+    const [mp3Loading, setMp3Loading] = useState(false);
     const username = 'kelvin'
     
     async function getFirstKeyFrame(s3ObjectKeyNoVideo){
@@ -56,11 +61,13 @@ export default function  EditVideoDetailsPage() {
             })
     }
     function handleGetMP3(){
+        setMp3Loading(true);
         const s3ObjectKey = 'videos/'+s3ObjectKeyNoVideo;
         axios.post(`${process.env.NEXT_PUBLIC_backendUrl}/generate-audio-for-transcript?username=${username}&s3ObjectKey=${s3ObjectKey}`)
             .then((res) => {
             const localAudioBase64 = res.data['audioBase64'];
             setAudioBase64(localAudioBase64);
+            setMp3Loading(false);
             })
             .catch((err) => {
             console.log(err);
@@ -101,23 +108,22 @@ export default function  EditVideoDetailsPage() {
             <Button variant='contained' color='primary' onClick={() => handleGetMP3()}>
                 Get MP3
             </Button>
+            <div className='w-full flex justify-center'>
+            {mp3Loading && <ClipLoader/>} {/* Add this line for the spinner */}
+            </div>
+
             <audio controls key={audioBase64}>
                 <source src={audioBase64} type='audio/mpeg' />
             </audio>
 
             <Typography>All Keyframes</Typography>
             {keyframesBase64 && Object.keys(keyframesBase64).map((key) => {
-                var isEditingLocal = false;
                 return(
                 <div key={key}>
                     <Typography variant='caption'>Keyframe {parseInt(key) + 1}</Typography>
                     <img src={keyframesBase64[key]['imageBase64']} />
                     <Typography variant='body2'>{keyframesBase64[key]['description']}</Typography>
-                    <Button variant='contained' onChange={() => isEditingLocal = true}>Edit Description</Button>
-                    {isEditingLocal && <FormControl>
-                        <Input placeholder='Enter New Description' required />
-                        <Button variant='contained' color='primary'>Submit</Button>
-                    </FormControl>}
+                    <Button variant='contained' onClick={() => router.push(`/EditDescription/${s3ObjectKeyNoVideo}?keyframeIndex=${key}`)}>Edit Description</Button>
                 </div>)
             })}
             
