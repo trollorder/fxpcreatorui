@@ -49,7 +49,7 @@ export default function Home() {
       }
       {
         keyframesBase64.length>0 && Object.keys(keyframesBase64).map((key) => (
-          <img src={`${keyframesBase64[key]}`} alt="keyframe" />
+          <img src={`${keyframesBase64[key]}`} alt="keyframe" key={key} />
         ))
       }
       <BottomBar />
