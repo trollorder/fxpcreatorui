@@ -3,9 +3,9 @@ import React, { useEffect } from 'react';
 import { useRouter, useSearchParams} from 'next/navigation';
 import { useState } from 'react';
 import { Button, Typography, TextField } from '@mui/material';
-import Dotloader from "react-spinners/Dotloader";
-
+import Cliploader from "react-spinners/Cliploader";
 import axios from 'axios';
+
 const Page = () => {
     const router = useRouter();
     const [username, setUsername] = useState("kelvin");
@@ -110,7 +110,7 @@ const Page = () => {
                 {isRegenerating && 
                 <div className='flex justify-center'>
                     <Typography variant='subtitle'>Regenerating Description</Typography>
-                    <Dotloader loading={isRegenerating} color='blue'/>
+                    <Cliploader loading={isRegenerating} color='blue'/>
                 </div>
                 }
                 <Button style={{color:'red', backgroundColor:'white'}} variant='contained' disabled={isRegenerating} onClick={()=>{handleRegenerateKeyframeDescription()}}>Regenerate Description</Button>
