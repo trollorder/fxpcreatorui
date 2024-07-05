@@ -52,8 +52,8 @@ const UploadVideoPage = () => {
                 <input {...getInputProps()} />
                 {
                     isDragActive ?
-                    <Typography>Drop the files here ...</Typography>:
-                    <Typography>Drag 'n' drop some files here, or click to select files</Typography>
+                    <Typography>Drop Files</Typography>:
+                    <Typography>Drag and Upload Files Here</Typography>
                 }
             </div>
             : <div className='bg-white h-1/3 text-black p-2 rounded-2xl'>
