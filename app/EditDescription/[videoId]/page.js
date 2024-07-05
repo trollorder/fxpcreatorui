@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Button, Typography, TextField } from '@mui/material';
 // import Cliploader from "react-spinners/ClipLoader";
 import axios from 'axios';
+import BottomBar from '@/app/Components/BottomBar';
 
 const Page = () => {
     const router = useRouter();
@@ -87,13 +88,13 @@ const Page = () => {
     }, []);
 
     return (
-        <div className='bg-black h-screen p-10 overflow-auto text-white'>
+        <div className='bg-black h-screen p-10 overflow-auto text-white flex flex-col gap-2'>
             <Typography variant='h5'>Edit Keyframe Description</Typography>
             <Typography></Typography>
             {keyframeDict && 
             <div className='flex flex-col overflow-auto w-full max-h-screen'>
                 <img src={keyframeDict.imageBase64} style={{maxWidth: '400px', maxHeight: '400px', objectFit: 'cover'}} className='rounded-2xl'/>
-                <Typography variant='h6'>Timestamp {numbertoTimeConverter(keyframeDict['filteredFrameIndexTimestamp'])}</Typography>
+                <Typography variant='h6'>Timestamp {numbertoTimeConverter(keyframeDict['filteredFrameIndexTimestamp']+1)}</Typography>
                 {
                     isEditing ?
                     <textarea variant='caption' onChange={(e)=>setNewDescription(e.target.value)} value={newDescription} style={{height:'10em', fontSize:'0.9rem'}}>{keyframeDict['description']}</textarea>
@@ -102,9 +103,9 @@ const Page = () => {
                 }
                 
                 {isEditing?
-                <Button style={{backgroundColor:'white', color:'black'}} onClick={()=>{setIsEditing(false); handleSaveDescription()}}>Save Description</Button>
+                <Button style={{backgroundColor:'white', color:'black', fontWeight:'bolder'}} onClick={()=>{setIsEditing(false); handleSaveDescription()}}>Save Description</Button>
                 :
-                <Button style={{backgroundColor:'white', color:'black'}} onClick={()=>{setIsEditing(true)}}>Edit Description</Button>
+                <Button style={{backgroundColor:'white', color:'black', fontWeight:'bolder'}} onClick={()=>{setIsEditing(true)}}>Edit Description</Button>
                 }
                 
                 {isRegenerating && 
@@ -113,9 +114,10 @@ const Page = () => {
                     {/* <Cliploader loading={isRegenerating} color='blue'/> */}
                 </div>
                 }
-                <Button style={{color:'red', backgroundColor:'white'}} variant='contained' disabled={isRegenerating} onClick={()=>{handleRegenerateKeyframeDescription()}}>Regenerate Description</Button>
+                <Button className='mt-4 p-2' style={{color:'red', backgroundColor:'white'}} variant='contained' disabled={isRegenerating} onClick={()=>{handleRegenerateKeyframeDescription()}}>Regenerate Description</Button>
             </div>
             }
+        <BottomBar/>
         </div>
     );
 };
