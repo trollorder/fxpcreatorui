@@ -1,29 +1,48 @@
 'use client'
 import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams} from 'next/navigation';
 import { useState } from 'react';
+import { Typography } from '@mui/material';
+import axios from 'axios';
 const Page = () => {
     const router = useRouter();
     const [username, setUsername] = useState("kelvin");
     const [s3ObjectKeyNoVideo,setS3ObjectKeyNoVideo] = useState(null);
-    const [keyframeIndex, setKeyframeIndex] = useState(null);
+    const [keyframeDict, setKeyframeDict] = useState(null);
+    const searchParams = useSearchParams()
+    const keyframeIndex = searchParams.get('keyframeIndex')
+
+
+    function getFirstKeyFrame(s3ObjectKey){
+        axios.get(`${process.env.NEXT_PUBLIC_backendUrl}/get-keyframe-for-video-base64?username=${username}&s3ObjectKey=videos/${s3ObjectKey}&keyframeIndex=${0}`).then((res) => {
+            console.log(res.data);
+            setKeyframeDict(res.data)
+        });
+    }
+
 
     useEffect(() => {
+        var videoId = ''
         if (typeof window !== 'undefined') {
             const videoIdAndIndex = window.location.pathname.split('/').pop();
-            const videoId = videoIdAndIndex.split('?')[0];
-            setS3ObjectKeyNoVideo(videoId);
-            const index = videoIdAndIndex.split('keyframeIndex')[1]
-            console.log(videoIdAndIndex)
-            setKeyframeIndex(index);
-            console.log(index)
-            console.log(videoId)
+            videoId = videoIdAndIndex.split('?')[0];
+            setS3ObjectKeyNoVideo(videoId); 
+            getFirstKeyFrame(videoId);           
         }
+        
     }, []);
+
     return (
-        <div>
-            <h1>Hello, Next.js!</h1>
-            <p>Welcome to your new page.</p>
+        <div className='bg-white h-screen p-10'>
+            <Typography>{s3ObjectKeyNoVideo}</Typography>
+            <Typography>{keyframeIndex}</Typography>
+            {keyframeDict && 
+            <div>
+                <img src={keyframeDict.imageBase64}/>
+                <Typography variant='h6'>Keyframe Index: {keyframeDict['keyframeIndex']}</Typography>
+                <Typography variant='caption'>{keyframeDict['description']}</Typography>
+            </div>
+            }
         </div>
     );
 };
