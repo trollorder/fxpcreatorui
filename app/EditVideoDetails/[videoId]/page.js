@@ -32,8 +32,10 @@ export default function  EditVideoDetailsPage() {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_backendUrl}/get-keyframe-for-video-base64?username=${username}&s3ObjectKey=${s3ObjectKey}&keyframeIndex=${0}`);
             console.log(response.data);
             if (response.data.error) {
+                getVideoDetails(s3ObjectKeyNoVideo);
                 console.log(response.data.error);
                 setIsTranscriptGenerated(false);
+                setIsLoading(false);
                 return false;
             }
             setIsTranscriptGenerated(true);
@@ -217,7 +219,7 @@ export default function  EditVideoDetailsPage() {
                 <ClipLoader color='red' size={250} fontWeight='bold'/>
             </div>}
             {/* This is the Background  */}
-            {keyframesBase64 && <img className='fixed top-10 rounded-2xl' src={keyframesBase64[currentDescriptionIdx]['imageBase64']} style={{width:'80%', height:'600px', objectFit:'cover'}}/>}
+            {keyframesBase64 && <img className='fixed top-10 rounded-2xl' src={keyframesBase64[currentDescriptionIdx]['imageBase64']} style={{width:'80%', height:'60%', objectFit:'cover'}}/>}
             <div>
                 <Typography className='relative px-2' style={{zIndex:20, fontWeight:'bolder', fontSize:'1.5rem'}}>{videoDetails['videoName']}</Typography>
                 <div className='flex justify-center items-center gap-1'>                
@@ -252,29 +254,29 @@ export default function  EditVideoDetailsPage() {
                 {currentDescription && <div className='z-10 relative w-full flex flex-col justify-center items-center'>
                     <div>
                         {isEditing?
-                        <textarea className='text-black rounded-xl' variant='caption' onChange={(e)=>setNewDescription(e.target.value)} value={newDescription} style={{height:'15em', width:'22em', fontSize:'0.9rem'}}>{newDescription}</textarea>
+                        <textarea className='text-black rounded-xl p-2' variant='caption' onChange={(e)=>setNewDescription(e.target.value)} value={newDescription} style={{height:'15em', width:'22em', fontSize:'0.9rem'}}>{newDescription}</textarea>
                         :   
                         <Typography className='text-white z-10 bg-black bg-opacity-45 m-2 p-2 rounded-xl'>{currentDescription}</Typography>}
                     </div>
                     
                     { isEditing ? 
                     <Button size='small' style={{backgroundColor:'white', color:'black', fontWeight:'bolder'}} variant='contained' onClick={() => {setIsEditing(false); handleSaveDescription()}}>
-                        Save Keyframe
+                        Save Accessibility Text
                     </Button>
                     :
                     <div className='flex flex-col gap-2'>
                         <Button size='small' style={{backgroundColor:'white', color:'black', fontWeight:'bolder'}} variant='contained' onClick={() => {setIsEditing(true); setNewDescription(currentDescription)}}>
-                            Edit Keyframe
+                            Edit Accessibility Text
                         </Button>
                         <Button size='small' style={{backgroundColor:'#ff0050', color:'white', fontWeight:'bolder'}} variant='contained' onClick={() => handleRegenerateKeyframeDescription()}>
-                            Regenerate Keyframe
+                            Regenerate Accessibility Text
                         </Button>
                     </div>
                     }
                 </div>}
                 
-                <div className='flex justify-center gap-2' style={{position:'fixed', bottom:250, left:100}}>
-                    <Button style={{backgroundColor:'white', color:'black'}} variant='contained' size='small' onClick={() => handleGenerateTranscript(true)}>Force Generate Transcript</Button>
+                <div className='flex justify-center bottom-64 fixed' style={{width:'80%', alignSelf:'center'}}>
+                    <Button style={{backgroundColor:'white', color:'black'}} variant='contained' size='small' onClick={() => handleGenerateTranscript(true)}>Generate New Transcript</Button>
                 </div>
                 <div className="w-5/6 flex overflow-auto flex-initial gap-4 fixed bottom-16" key={keyframesBase64}>
                     {keyframesBase64 &&

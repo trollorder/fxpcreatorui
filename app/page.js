@@ -67,12 +67,12 @@ export default function Home() {
         <div className="flex flex-col overflow-x-auto w-full">
           {
           videos.length>0 &&  videos.map((video) => (
-                <div className="flex" key={video['s3ObjectKey']}> 
+                <div className="flex w-full justify-center items-center" key={video['s3ObjectKey']}> 
                   <div className="flex flex-col overflow-auto justify-center w-1/2">
                     <Typography className=" w-2/3"  variant='caption'style={{color:'white'}}>{video.videoName}</Typography>
-                    <img src={keyframesBase64[video['s3ObjectKey']]['imageBase64']} className="w-40 h-40"/>
+                    <img  src={keyframesBase64[video['s3ObjectKey']]['imageBase64']} className="w-40 h-40 rounded-2xl"/>
                   </div>
-                  <div className="flex w-1/2 justify-center, items-center gap-2 mt-2">
+                  <div className="flex w-1/2 justify-center items-center gap-2 mt-2">
                     <IconButton style={{backgroundColor:'white', width:'2em', height:'2em'}} onClick={() => router.push(`/EditVideoDetails/${video['s3ObjectKey'].split('/').pop()}`)}><EditIcon style={{color:'blue'}}/></IconButton>
                     <IconButton style={{backgroundColor:'white', width:'2em', height:'2em'}} onClick={() => handleDelete(video['s3ObjectKey'])}><Delete style={{color:'red', fontSize:'30px'}}/></IconButton>
                   </div>

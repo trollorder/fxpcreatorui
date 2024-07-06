@@ -5,8 +5,10 @@ import {useDropzone} from 'react-dropzone'
 import { ClipLoader } from 'react-spinners';
 import axios from 'axios';
 import BottomBar from '../Components/BottomBar';
+import { useRouter } from 'next/navigation';
 
 const UploadVideoPage = () => {
+    const router = useRouter();
     const [videoName, setVideoName] = useState('');
     const [fileUpload , setFileUpload] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -41,6 +43,7 @@ const UploadVideoPage = () => {
                 setIsUploading(false);
                 setFileUpload(null);
                 console.log(response.data);
+                router.push('/');
             } catch (error) {
                 console.error(error);
             }
