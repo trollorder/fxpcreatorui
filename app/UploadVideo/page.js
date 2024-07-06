@@ -70,7 +70,7 @@ const UploadVideoPage = () => {
                 </div>
             }
             {fileUpload &&
-            <div className='bg-white w-full text-black rounded-xl mt-2 p-2'>
+            <div className='bg-white w-full text-black rounded-xl mt-2 p-2 flex flex-col gap-2'>
                 <Typography>Selected File: {fileUpload.name}</Typography>
                 <div className='w-full justify-center flex flex-col'>
                     <Typography>Uploading</Typography>

@@ -222,7 +222,7 @@ export default function  EditVideoDetailsPage() {
             </div>}
             {/* This is the Background  */}
             {keyframesBase64 && <img className='fixed top-10 rounded-2xl' src={keyframesBase64[currentDescriptionIdx]['imageBase64']} style={{width:'80%', height:'60%', objectFit:'cover'}}/>}
-           {!isLoading &&  <div>
+           {videoDetails &&  <div>
                 <Typography className='relative px-2' style={{zIndex:20, fontWeight:'bolder', fontSize:'1.5rem'}}>{videoDetails['videoName']}</Typography>
                 <div className='flex justify-center items-center gap-1'>                
                     <Input className='bg-white m-2 p-2 rounded-xl' placeholder='Enter New Video Title' required onChange={(e) => setNewTitle(e.target.value)} />
