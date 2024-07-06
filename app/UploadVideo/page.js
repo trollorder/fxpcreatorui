@@ -56,13 +56,13 @@ const UploadVideoPage = () => {
 
     return (
         <div className='w-full h-screen overflow-auto bg-black text-white p-10'>
-            <Typography variant='h5'>Upload Video</Typography>
+            <Typography variant='h5' style={{fontWeight:'bolder'}} className='px-2 mb-2'>Upload Video</Typography>
             {!fileUpload ? <div {...getRootProps()} className='bg-white h-1/3 text-black p-2 rounded-2xl'>
                 <input {...getInputProps()} />
                 {
                     isDragActive ?
-                    <Typography>Drop Files</Typography>:
-                    <Typography>Drag and Upload Files Here</Typography>
+                    <Typography style={{fontWeight:'bolder'}}>Drop Files</Typography>:
+                    <Typography style={{fontWeight:'bolder'}}>Drag and Upload Files Here. Or Click Here. Mp4 Files Only</Typography>
                 }
             </div>
             : <div className='bg-white h-1/3 text-black p-2 rounded-2xl'>
@@ -78,7 +78,7 @@ const UploadVideoPage = () => {
                 </div>
                 <Input placeholder='Video Name' onChange={(e) => setVideoName(e.target.value)} />
                 <Button disabled={isUploading} style={{color:'white', fontWeight:'bolder', backgroundColor:'black'}} variant='contained' onClick={uploadVideo}>Upload</Button>
-                <Button className='w-full' style={{backgroundColor:'darkred', color:'white'}} disabled={isUploading} onClick={() => setFileUpload(null)}>Cancel</Button>
+                <Button className='w-full' style={{backgroundColor:'darkred', color:'white', fontWeight:'bolder'}} disabled={isUploading} onClick={() => setFileUpload(null)}>Cancel</Button>
             </div>
             }
         <BottomBar/>

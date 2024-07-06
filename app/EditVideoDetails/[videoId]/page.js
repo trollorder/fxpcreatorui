@@ -7,6 +7,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { useRouter } from 'next/navigation';
 import BottomBar from '@/app/Components/BottomBar';
 import { Check, Hearing } from '@mui/icons-material';
+import ConfirmRegenerate from '@/app/Components/ConfirmRegenerate';
 
 export default function  EditVideoDetailsPage() {
     const router = useRouter();
@@ -23,6 +24,7 @@ export default function  EditVideoDetailsPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [newDescription, setNewDescription] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [isConfirmRegenerating, setIsConfirmRegenerating] = useState(false);
     const username = 'kelvin'
     
     async function getFirstKeyFrame(s3ObjectKeyNoVideo){
@@ -216,11 +218,11 @@ export default function  EditVideoDetailsPage() {
     return (
         <div className='min-h-screen bg-black text-white p-10 pb-20'>
             {isLoading && <div style={{zIndex:100, position:'fixed', top:200, left:80}}>
-                <ClipLoader color='red' size={250} fontWeight='bold'/>
+                <ClipLoader color='#ff0050' size={250} fontWeight='bold'/>
             </div>}
             {/* This is the Background  */}
             {keyframesBase64 && <img className='fixed top-10 rounded-2xl' src={keyframesBase64[currentDescriptionIdx]['imageBase64']} style={{width:'80%', height:'60%', objectFit:'cover'}}/>}
-            <div>
+           {!isLoading &&  <div>
                 <Typography className='relative px-2' style={{zIndex:20, fontWeight:'bolder', fontSize:'1.5rem'}}>{videoDetails['videoName']}</Typography>
                 <div className='flex justify-center items-center gap-1'>                
                     <Input className='bg-white m-2 p-2 rounded-xl' placeholder='Enter New Video Title' required onChange={(e) => setNewTitle(e.target.value)} />
@@ -233,20 +235,16 @@ export default function  EditVideoDetailsPage() {
                     </IconButton>
                     }
                 </div>
-            </div>
+            </div>}
             
 
-            {!isTranscriptGenerated && 
+            {!isTranscriptGenerated && !isLoading && 
                 <div className='flex flex-col'>
-                    {!isGeneratingTranscript?<Typography variant='caption'>Transcript not generated yet</Typography> : <ClipLoader color='white'/>}
-                    <Button style={{backgroundColor:'white', color:'black'}} variant='contained' onClick={() => handleGenerateTranscript()}>Generate Transcript Now</Button>
+                    {!isGeneratingTranscript?<Typography variant='caption' style={{fontWeight:'bolder'}}>Transcript not generated yet</Typography> : <ClipLoader color='#ff0050'/>}
+                    <Button style={{backgroundColor:'white', color:'black', fontWeight:'bolder'}} variant='contained' onClick={() => handleGenerateTranscript()}>Generate Transcript</Button>
                 </div>
             }
             {isTranscriptGenerated && <div>
-                
-                {/* <div className='w-full flex justify-center p-2'>
-                {mp3Loading && <ClipLoader color='white'/>} 
-                </div> */}
 
                 {audioBase64 && <audio controls key={audioBase64}>
                     <source src={audioBase64} type='audio/mpeg' />
@@ -276,7 +274,7 @@ export default function  EditVideoDetailsPage() {
                 </div>}
                 
                 <div className='flex justify-center bottom-64 fixed' style={{width:'80%', alignSelf:'center'}}>
-                    <Button style={{backgroundColor:'white', color:'black'}} variant='contained' size='small' onClick={() => handleGenerateTranscript(true)}>Generate New Transcript</Button>
+                    <Button style={{backgroundColor:'white', color:'black', fontWeight:'bolder'}} variant='contained' size='small' onClick={() => setIsConfirmRegenerating(true)}>Generate New Transcript</Button>
                 </div>
                 <div className="w-5/6 flex overflow-auto flex-initial gap-4 fixed bottom-16" key={keyframesBase64}>
                     {keyframesBase64 &&
@@ -291,6 +289,7 @@ export default function  EditVideoDetailsPage() {
                         ))}
                 </div>
             </div>}
+            <ConfirmRegenerate show={isConfirmRegenerating} onCancel={() => setIsConfirmRegenerating(false)} onRegenerate={() => {handleGenerateTranscript(true); setIsConfirmRegenerating(false)}}/>
             <BottomBar/>
             </div>
         );

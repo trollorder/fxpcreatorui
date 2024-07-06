@@ -13,7 +13,7 @@ const BottomBar = () => {
             </IconButton>
             
             <IconButton onClick={()=> router.push('/UploadVideo')}>
-                <Add style={{backgroundColor:'red', color:'white', fontSize:'40'}} className='rounded-xl' />
+                <Add style={{backgroundColor:'#ff0050', color:'white', fontSize:'40'}} className='rounded-xl' />
             </IconButton>
             <IconButton onClick={()=> router.push('/')}>
                 <Home />
