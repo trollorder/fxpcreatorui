@@ -11,13 +11,13 @@ const BottomBar = () => {
             <IconButton >
                 <Menu/>
             </IconButton>
-            <IconButton onClick={()=> router.push('/')}>
-                <Home/>
-            </IconButton>
-            <IconButton onClick={()=> router.push('/UploadVideo')}>
-                <Add />
-            </IconButton>
             
+            <IconButton onClick={()=> router.push('/UploadVideo')}>
+                <Add style={{backgroundColor:'red', color:'white', fontSize:'40'}} className='rounded-xl' />
+            </IconButton>
+            <IconButton onClick={()=> router.push('/')}>
+                <Home />
+            </IconButton>
         </div>
     );
 };

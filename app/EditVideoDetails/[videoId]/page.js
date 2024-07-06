@@ -2,10 +2,11 @@
 import React, { use } from 'react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FormControl, Input, Typography, Button } from '@mui/material';
+import { FormControl, Input, Typography, Button, IconButton } from '@mui/material';
 import ClipLoader from "react-spinners/ClipLoader";
 import { useRouter } from 'next/navigation';
 import BottomBar from '@/app/Components/BottomBar';
+import { Check, Hearing } from '@mui/icons-material';
 
 export default function  EditVideoDetailsPage() {
     const router = useRouter();
@@ -17,8 +18,11 @@ export default function  EditVideoDetailsPage() {
     const [mp3Loading, setMp3Loading] = useState(false);
     const [isTranscriptGenerated, setIsTranscriptGenerated] = useState(false);
     const [isGeneratingTranscript, setIsGeneratingTranscript] = useState(false);
-    const [currentDescription, setCurrentDescription] = useState('');
+    const [currentDescription, setCurrentDescription] = useState(null);
     const [currentDescriptionIdx, setCurrentDescriptionIdx] = useState(0);
+    const [isEditing, setIsEditing] = useState(false);
+    const [newDescription, setNewDescription] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
     const username = 'kelvin'
     
     async function getFirstKeyFrame(s3ObjectKeyNoVideo){
@@ -36,6 +40,7 @@ export default function  EditVideoDetailsPage() {
             getVideoDetails(s3ObjectKeyNoVideo);
             getAllKeyFrames(s3ObjectKeyNoVideo);
             setKeyframesBase64({...keyframesBase64, 0: response.data});
+            setIsLoading(false);
             return true;
         } catch (error) {
             console.log(error);
@@ -43,6 +48,17 @@ export default function  EditVideoDetailsPage() {
         }
         
     }
+
+    function getkeyframeDict(s3ObjectKey,keyframeIndex){
+        console.log('updating keyframe dict')
+        axios.get(`${process.env.NEXT_PUBLIC_backendUrl}/get-keyframe-for-video-base64?username=${username}&s3ObjectKey=videos/${s3ObjectKey}&keyframeIndex=${keyframeIndex}`).then((res) => {
+            console.log(res.data);
+            setKeyframesBase64(prevState => ({...prevState, [keyframeIndex]: res.data}));
+            setCurrentDescription(res.data['description']);
+            return true
+        });
+    }
+
     function numbertoTimeConverter(number){
         var timestamp = ''
         var hours = Math.floor(number / 3600);
@@ -64,8 +80,8 @@ export default function  EditVideoDetailsPage() {
         const s3ObjectKey = 'videos/'+s3ObjectKeyNoVideo;
         axios.put(`${process.env.NEXT_PUBLIC_backendUrl}/update-video-title?username=${username}&s3ObjectKey=${s3ObjectKey}&newTitle=${newTitleLocal}`)
             .then((res) => {
-            console.log(res.data);
-            getVideoDetails(s3ObjectKeyNoVideo);
+                console.log(res.data);
+                getVideoDetails(s3ObjectKeyNoVideo);
             })
             .catch((err) => {
             console.log(err);
@@ -96,6 +112,7 @@ export default function  EditVideoDetailsPage() {
             })
     }
     function handleGetMP3(){
+        setIsLoading(true);
         setMp3Loading(true);
         const s3ObjectKey = 'videos/'+s3ObjectKeyNoVideo;
         axios.post(`${process.env.NEXT_PUBLIC_backendUrl}/generate-audio-for-transcript?username=${username}&s3ObjectKey=${s3ObjectKey}`)
@@ -103,6 +120,7 @@ export default function  EditVideoDetailsPage() {
             const localAudioBase64 = res.data['audioBase64'];
             setAudioBase64(localAudioBase64);
             setMp3Loading(false);
+            setIsLoading(false);
             })
             .catch((err) => {
             console.log(err);
@@ -112,6 +130,7 @@ export default function  EditVideoDetailsPage() {
     function handleGenerateInitialTranscript(){
         const s3ObjectKey = 'videos/'+s3ObjectKeyNoVideo;
         setIsGeneratingTranscript(true);
+        setIsLoading(true);
         axios.post(`${process.env.NEXT_PUBLIC_backendUrl}/generate-transcript_v2?username=${username}&s3ObjectKey=${s3ObjectKey}`)
             .then((res) => {
             console.log(res.data);
@@ -120,10 +139,46 @@ export default function  EditVideoDetailsPage() {
             setIsGeneratingTranscript(false);
             getAllKeyFrames(s3ObjectKeyNoVideo);
             getVideoDetails(s3ObjectKeyNoVideo);
+            setIsLoading(false);
             })
             .catch((err) => {
             console.log(err);
             });
+    }
+
+    function handleSaveDescription(){
+        setIsLoading(true);
+        axios.put(`${process.env.NEXT_PUBLIC_backendUrl}/edit-keyframe-description?username=${username}`, {
+            's3ObjectKey': 'videos/' + s3ObjectKeyNoVideo,
+            'keyframeIndex': currentDescriptionIdx,
+            'newDescription': newDescription
+        })
+            .then((res) =>{
+            console.log(res.data);
+                // Reload
+                getkeyframeDict(s3ObjectKeyNoVideo, currentDescriptionIdx);
+                setIsLoading(false);
+            })
+            .catch((err) => {
+            console.log(err);
+        })
+    }
+    
+    function handleRegenerateKeyframeDescription(){
+        setIsRegenerating(true);
+        axios.post(`${process.env.NEXT_PUBLIC_backendUrl}/regenerate-keyframe-description?username=${username}`, {
+            's3ObjectKey': 'videos/' + s3ObjectKeyNoVideo,
+            'keyframeIndex': keyframeIndex
+        })
+            .then((res) => {
+            console.log(res.data);
+            getkeyframeDict(s3ObjectKeyNoVideo,keyframeIndex);
+            setIsRegenerating(false);
+            })
+            .catch((err) => {
+            console.log(err);
+        })
+    
     }
     
     useEffect(() => {
@@ -140,25 +195,32 @@ export default function  EditVideoDetailsPage() {
     
     return (
         <div className='min-h-screen bg-black text-white p-10 pb-20'>
-            <Typography>Edit Video Details</Typography>
-            <Typography variant='caption'>{videoDetails['videoName']}</Typography>
-            {keyframesBase64 && <img src={keyframesBase64[0]['imageBase64']} style={{width:400, height:300, objectFit:'contain'}}/>}
-            <Input className='bg-white m-2 p-2  rounded-xl' placeholder='Enter New Video Title' required onChange={(e) => setNewTitle(e.target.value)} />
-            <Button style={{backgroundColor:'white', color:'black'}} variant='contained' color='primary' onClick={() => handleSubmit(newTitle)}>
-                Submit
-            </Button>
+            {isLoading && <div style={{zIndex:100, position:'fixed', top:200, left:80}}>
+                <ClipLoader color='red' size={250} fontWeight='bold'/>
+            </div>}
+            {/* This is the Background  */}
+            {keyframesBase64 && <img className='fixed top-10 rounded-2xl' src={keyframesBase64[currentDescriptionIdx]['imageBase64']} style={{width:'80%', height:'600px', objectFit:'cover'}}/>}
+            
+            <div className='flex justify-center items-center gap-1'>
+                <Input className='bg-white m-2 p-2 rounded-xl' placeholder='Enter New Video Title' required onChange={(e) => setNewTitle(e.target.value)} />
+                <IconButton style={{backgroundColor:'white', color:'black', height:'2em'}} variant='contained' color='primary' onClick={() => handleSubmit(newTitle)}>
+                    <Check/>
+                </IconButton>
+                {isTranscriptGenerated && 
+                <IconButton variant='contained' color='primary' style={{backgroundColor:'white', color:'black', height:'2em'}} onClick={() => handleGetMP3()}>
+                        <Hearing/>
+                </IconButton>
+                }
+            </div>
 
             {!isTranscriptGenerated && 
                 <div className='flex flex-col'>
-                    
                     {!isGeneratingTranscript?<Typography variant='caption'>Transcript not generated yet</Typography> : <ClipLoader color='white'/>}
                     <Button style={{backgroundColor:'white', color:'black'}} variant='contained' onClick={() => handleGenerateInitialTranscript()}>Generate Transcript Now</Button>
                 </div>
             }
             {isTranscriptGenerated && <div>
-                <Button variant='contained' color='primary' style={{backgroundColor:'white', color:'black'}} onClick={() => handleGetMP3()}>
-                    Listen to current transcript
-                </Button>
+                
                 <div className='w-full flex justify-center p-2'>
                 {mp3Loading && <ClipLoader color='white'/>} {/* Add this line for the spinner */}
                 </div>
@@ -166,33 +228,38 @@ export default function  EditVideoDetailsPage() {
                 {audioBase64 && <audio controls key={audioBase64}>
                     <source src={audioBase64} type='audio/mpeg' />
                 </audio>}
-                <Typography className='text-white'>{currentDescription}</Typography>
-                <Button size='small' style={{backgroundColor:'white', color:'black', fontWeight:'bolder'}} variant='contained' onClick={() => router.push(`/EditDescription/${s3ObjectKeyNoVideo}?keyframeIndex=${currentDescriptionIdx}`)}>Edit Keyframe</Button>
+                {currentDescription && <div className='z-10 relative w-full flex flex-col justify-center items-center'>
+                    <div>
+                        {isEditing?
+                        <textarea className='text-black rounded-xl' variant='caption' onChange={(e)=>setNewDescription(e.target.value)} value={newDescription} style={{height:'15em', width:'22em', fontSize:'0.9rem'}}>{newDescription}</textarea>
+                        :   
+                        <Typography className='text-white z-10 bg-black bg-opacity-45 m-2 p-2 rounded-xl'>{currentDescription}</Typography>}
+                    </div>
+                    
+                    { isEditing ? 
+                    <Button size='small' style={{backgroundColor:'white', color:'black', fontWeight:'bolder'}} variant='contained' onClick={() => {setIsEditing(false); handleSaveDescription()}}>
+                        Save Keyframe
+                    </Button>
+                    :
+                    <Button size='small' style={{backgroundColor:'white', color:'black', fontWeight:'bolder'}} variant='contained' onClick={() => {setIsEditing(true); setNewDescription(currentDescription)}}>
+                        Edit Keyframe
+                    </Button>
+                    }
+                </div>}
+                
 
                 <Typography>All Keyframes</Typography>
-                <div className="max-w-screen-xl  flex overflow-auto flex-initial gap-4">
-                {keyframesBase64 &&
-                    Object.keys(keyframesBase64).map((key) => (
-                    <button onClick={()=> {setCurrentDescriptionIdx(key); setCurrentDescription(keyframesBase64[key]['description'])}} className=" flex-shrink-0 rounded-xl w-48" key={key}>
-                        {/* <Typography variant='caption'>Keyframe {parseInt(key) + 1}</Typography> */}
-                        <img src={keyframesBase64[key]["imageBase64"]} alt={`Keyframe ${key + 1}`} style={{width:200, height:150, justifyContent:'center', objectFit:'cover'}}/>
-                        <Typography variant="caption">
-                            {numbertoTimeConverter(keyframesBase64[key]["filteredFrameIndexTimestamp"] + 1)}
-                        </Typography>
-                        {/* <Button
-                        size='small'
-                        style={{ backgroundColor: "white", color: "black", fontWeight: "bolder", fontSize: "0.5rem"}}
-                        variant="contained"
-                        onClick={() =>
-                            router.push(
-                            `/EditDescription/${s3ObjectKeyNoVideo}?keyframeIndex=${key}`
-                            )
-                        }
-                        >
-                        Edit Description
-                        </Button> */}
-                    </button>
-                    ))}
+                <div className="w-5/6 flex overflow-auto flex-initial gap-4 fixed bottom-16" key={keyframesBase64}>
+                    {keyframesBase64 &&
+                        Object.keys(keyframesBase64).sort((a,b) => a['filteredFrameIndexTimestamp']<b['filteredFrameIndexTimestamp']).map((key) => (
+                        <button onClick={()=> {setCurrentDescriptionIdx(key); setCurrentDescription(keyframesBase64[key]['description']);setIsEditing(false)}} className=" flex-shrink-0 rounded-xl w-48" key={key}>
+                            {/* <Typography variant='caption'>Keyframe {parseInt(key) + 1}</Typography> */}
+                            <img src={keyframesBase64[key]["imageBase64"]} alt={`Keyframe ${key + 1}`} style={{width:200, height:150, justifyContent:'center', objectFit:'cover'}}/>
+                            <Typography variant="caption">
+                                {numbertoTimeConverter(keyframesBase64[key]["filteredFrameIndexTimestamp"] + 1)}
+                            </Typography>
+                        </button>
+                        ))}
                 </div>
             </div>}
             <BottomBar/>
