@@ -14,5 +14,8 @@ bun dev
 ```
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Configuration
+.env should contain NEXT_PUBLIC_backendUrl = '' with the endpoint being your live FXP BackendUrl
+
 ## Development
 Used MUI as a quick bootstrapping tool with NEXT.js and TailwindCss
